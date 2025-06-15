@@ -5,21 +5,22 @@
   <title>Agent Z - Voice Assistant</title>
 </head>
 <body>
-  <h2>🎙 Speak to Agent Z</h2>
-  <button onclick="startListening()">🎤 Start Speaking</button>
+  <h2>🤖 Chat with Agent Z</h2>
+  <button onclick="startChat()">🎤 Chat with Agent</button>
   <p id="status">Status: Idle</p>
-  <p><strong>Your Query:</strong> <span id="transcript"></span></p>
+  <p><strong>You said:</strong> <span id="transcript"></span></p>
+  <p><strong>Agent Z:</strong> <span id="response"></span></p>
 
   <script>
-    const webhookUrl = 'https://your-ngrok-or-n8n-cloud-url/webhook/agentz'; // replace with your actual webhook URL
+    const webhookUrl = 'https://your-n8n-url/webhook/agentz'; // replace this with your actual n8n webhook URL
 
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'hi-IN'; // or 'en-US' for English
+    recognition.lang = 'hi-IN'; // Use 'en-US' for English
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    function startListening() {
-      document.getElementById('status').innerText = 'Listening...';
+    function startChat() {
+      document.getElementById('status').innerText = '🎙 Listening... Speak now';
       recognition.start();
     }
 
@@ -28,7 +29,6 @@
       document.getElementById('transcript').innerText = transcript;
       document.getElementById('status').innerText = 'Sending to Agent Z...';
 
-      // Send to n8n webhook
       fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -36,19 +36,19 @@
       })
       .then(res => res.json())
       .then(data => {
-        document.getElementById('status').innerText = 'Response received!';
-        console.log('Response from Agent Z:', data);
-        // Optionally play audio or display text response
+        const reply = data.response || data.message || 'No response received.';
+        document.getElementById('response').innerText = reply;
+        document.getElementById('status').innerText = 'Agent Z responded. ✅';
       })
       .catch(err => {
         console.error(err);
-        document.getElementById('status').innerText = 'Error sending data.';
+        document.getElementById('status').innerText = '❌ Error contacting Agent Z';
       });
     };
 
     recognition.onerror = function(err) {
       console.error('Speech recognition error:', err);
-      document.getElementById('status').innerText = 'Error during speech recognition.';
+      document.getElementById('status').innerText = '❌ Error during speech recognition.';
     };
   </script>
 </body>
